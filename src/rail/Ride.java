@@ -6,13 +6,20 @@ public class Ride {
 	private String departureTime;
 	private String destinationStation;
 	private String arrivalTime;
+	private StopOver[] stopovers;
 
-	public Ride(String departureStation, String departureTime, String destinationStation, String arrivalTime) {
+	public Ride(String departureStation, String departureTime,
+			String destinationStation, String arrivalTime) {
 
 		setArrivalTime(arrivalTime);
 		setDepartureStation(departureStation);
 		setDepartureTime(departureTime);
 		setDestinationStation(destinationStation);
+	}
+
+	public void addStopOver(StopOver[] stopovers) {
+		this.stopovers = stopovers;
+
 	}
 
 	public String getDepartureStation() {
@@ -47,10 +54,30 @@ public class Ride {
 		this.arrivalTime = arrivalTime;
 	}
 
+	public StopOver[] getStopOvers() {
+		return stopovers;
+	}
+
 	@Override
+	/*
+	 * public String toString() { return + "\nStopovers: " + "\n" +
+	 * Arrays.toString(stopovers) ; }
+	 */
 	public String toString() {
-		return "Ride from departure Station:" + departureStation + ", departure Time=" + departureTime + "\n"
-				+ "The destination Station: " + destinationStation + ", arrival Time=" + arrivalTime + "\n";
+
+		StringBuffer sbRides = new StringBuffer("Ride from departure Station:"
+				+ departureStation + ", departure Time=" + departureTime + "\n"
+				+ "The destination Station: " + destinationStation
+				+ ", arrival Time=" + arrivalTime);
+		if (stopovers != null) {
+			sbRides.append("\n\nThe stopovers from " + departureStation
+					+ " to " + destinationStation + ": ");
+			for (int i = 0; i < stopovers.length; i++) {
+				sbRides.append("\n\nStopover number " + (i + 1) + ": ");
+				sbRides.append(stopovers[i].toString());
+			}
+		}
+		return sbRides.toString();
 	}
 
 }
