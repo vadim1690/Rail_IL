@@ -1,13 +1,19 @@
 package rail;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException {
 
 		Scanner s = new Scanner(System.in);
 		RidesAdmin admin = new RidesAdmin(10);
+		File ridesFile = new File("Rides.txt");
+		
+		if(ridesFile.exists()) 
+			admin.readRidesFile();
 
 		int choice;
 		boolean fContinue = true;
@@ -17,6 +23,7 @@ public class Main {
 			System.out.println("1-Create new ride ");
 			System.out.println("2-Show sorted rides ");
 			System.out.println("3-Search train by departure time or by arrival time");
+			System.out.println("4-Save rides into file");
 			System.out.println("9-To exit");
 			choice = s.nextInt();
 
@@ -128,7 +135,12 @@ public class Main {
 				}
 				break;
 			}
-
+			case 4: {
+				// Saving rides into file
+				admin.saveTheRidesIntoFile();
+				System.out.println("Saving... \nThe file saved successfilly.");
+				break;
+			}
 			case 9: {
 				// When the user wants to exit by pressing 9
 				fContinue = false;
