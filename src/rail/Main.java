@@ -2,6 +2,7 @@ package rail;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
@@ -9,11 +10,23 @@ public class Main {
 	public static void main(String[] args) throws FileNotFoundException {
 
 		Scanner s = new Scanner(System.in);
-		RidesAdmin admin = new RidesAdmin(10);
-		File ridesFile = new File("Rides.txt");
-		
-		if(ridesFile.exists()) 
-			admin.readRidesFile();
+		RidesAdmin admin = new RidesAdmin();
+		String space = "\n";
+
+		if (args.length > 0) {
+
+			if (args[3].equalsIgnoreCase("HTML")) {
+				space = "<br>";
+
+			}
+			String departureStation = args[0];
+			String destinationStation = args[1];
+			String departureTime = args[2];
+
+			System.out.println(
+					admin.searchRideByDepartureTime(departureStation, destinationStation, departureTime, space));
+			return;
+		}
 
 		int choice;
 		boolean fContinue = true;
@@ -22,7 +35,7 @@ public class Main {
 			System.out.println("Enter your choice :");
 			System.out.println("1-Create new ride ");
 			System.out.println("2-Show sorted rides ");
-			System.out.println("3-Search train by departure time or by arrival time");
+			System.out.println("3-Search train by departure time");
 			System.out.println("4-Save rides into file");
 			System.out.println("9-To exit");
 			choice = s.nextInt();
@@ -38,7 +51,7 @@ public class Main {
 				int answer;
 				int numOfStopovers;
 				String arrivalTime;
-				StopOver[] stopOvers;
+				ArrayList<StopOver> stopOvers;
 
 				System.out.println("Enter departure station:");
 				s.nextLine();
@@ -53,17 +66,15 @@ public class Main {
 				System.out.println("Enter arrival Time:");
 				arrivalTime = s.nextLine();
 
-				System.out
-						.println("If this ride has stopovers press 1, if not press 2");
+				System.out.println("If this ride has stopovers press 1, if not press 2");
 				answer = s.nextInt();
 
-				admin.addNewRide(departureStation, departureTime,
-						destinationStation, arrivalTime);
+				admin.addNewRide(departureStation, departureTime, destinationStation, arrivalTime);
 
 				if (answer == 1) {
 					System.out.println("How many stopovers this ride has? ");
 					numOfStopovers = s.nextInt();
-					stopOvers = new StopOver[numOfStopovers];
+					stopOvers = new ArrayList<StopOver>(numOfStopovers);
 					for (int i = 0; i < numOfStopovers; i++) {
 
 						System.out.println("\nEnter stopover name: ");
@@ -72,12 +83,11 @@ public class Main {
 						}
 						stopOver = s.nextLine();
 
-						System.out
-								.println("\nEnter arrival time at the stopover: ");
+						System.out.println("\nEnter arrival time at the stopover: ");
 
 						timeAtStopover = s.nextLine();
 
-						stopOvers[i] = new StopOver(stopOver, timeAtStopover);
+						stopOvers.add(new StopOver(stopOver, timeAtStopover));
 
 					}
 					admin.addStopOver(stopOvers);
@@ -92,16 +102,15 @@ public class Main {
 			}
 			case 2: {
 				// Print all the rides
-				admin.sortRides();
+				admin.sortRides(admin.getRides());
 				System.out.println(admin.toString());
 				break;
 			}
 
 			case 3: {
 				// Search train by departure station to the destination station
-				// by arrival time or departure time
-				String arrivalTime, destinationStation, departureTime, departureStation;
-				int num;
+				// by departure time
+				String destinationStation, departureTime, departureStation;
 
 				System.out.println("Enter the departure station: ");
 				s.nextLine();
@@ -110,29 +119,24 @@ public class Main {
 				System.out.println("Enter the destination station: ");
 				destinationStation = s.nextLine();
 
-				System.out.println("Press 1 to search by arrival time");
-				System.out.println("Press 2 to search by departure time: \n");
-				num = s.nextInt();
+				System.out.println("Enter departure time: ");
 
-				if (num == 1) {
-					System.out.println("Enter arrival time: ");
-					s.nextLine();
-					arrivalTime = s.nextLine();
+				departureTime = s.nextLine();
 
-					admin.sortRides();
-					System.out.println(admin.searchRideByArrivalTime(
-							departureStation, destinationStation, arrivalTime));
-				}
-				if (num == 2) {
+				while (Integer.parseInt(departureTime.substring(0, 1)) < 0
+						|| Integer.parseInt(departureTime.substring(0, 1)) > 23
+						|| Integer.parseInt(departureTime.substring(3, 4)) < 0
+						|| Integer.parseInt(departureTime.substring(3, 4)) > 59) {
+					System.out.println("Wrong input try again");
 					System.out.println("Enter departure time: ");
 					s.nextLine();
 					departureTime = s.nextLine();
-
-					admin.sortRides();
-					System.out.println(admin
-							.searchRideByDepartureTime(departureStation,
-									destinationStation, departureTime));
 				}
+
+				admin.sortRides(admin.getRides());
+				System.out
+						.println(admin.searchRideByDepartureTime(departureStation, destinationStation, departureTime,space));
+
 				break;
 			}
 			case 4: {

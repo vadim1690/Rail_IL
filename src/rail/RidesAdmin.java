@@ -3,62 +3,58 @@ package rail;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class RidesAdmin {
 
-	private Ride[] rides;
+	private ArrayList<Ride> rides;
 	private int numberOfCurrentRides;
-	
-	File ridesFile;
-	File ridesFileForBrowser;
 
-	public RidesAdmin(int maxNumberOfRides) {
-		this.rides = new Ride[maxNumberOfRides];
+	File ridesFile;
+
+	public RidesAdmin() throws FileNotFoundException {
+		this.rides = new ArrayList<Ride>();
 		numberOfCurrentRides = 0;
-		ridesFile = new File("Rides.txt");
-		ridesFileForBrowser = new File("Rides_For_Browser.txt");
+		ridesFile = new File("/home/vadim/Rail_IL/Rides.txt");
+		readRidesFile();
 
 	}
 
 	// pressing 1 will go to this function: Add rides
-	public boolean addNewRide(String departureStation, String departureTime,
-			String destinationStation, String arrivalTime) {
-		if (numberOfCurrentRides >= rides.length) {
-			return false;
-		}
-		rides[numberOfCurrentRides++] = new Ride(departureStation,
-				departureTime, destinationStation, arrivalTime);
+	public void addNewRide(String departureStation, String departureTime, String destinationStation,
+			String arrivalTime) {
 
-		return true;
+		rides.add(new Ride(departureStation, departureTime, destinationStation, arrivalTime));
+		numberOfCurrentRides++;
 
 	}
 
 	// sorting rides by bubble sort with method split which happens after
 	// pressing 2
-	public void sortRides() {
-		for (int i = numberOfCurrentRides - 1; i > 0; i--) {
+	public void sortRides(ArrayList<Ride> tempRides) {
+		for (int i = tempRides.size() - 1; i > 0; i--) {
 			for (int j = 0; j < i; j++) {
 
-				String[] parts1 = rides[j].getDepartureTime().split(":");
-				String[] parts2 = rides[j + 1].getDepartureTime().split(":");
+				String[] parts1 = tempRides.get(j).getDepartureTime().split(":");
+				String[] parts2 = tempRides.get(j + 1).getDepartureTime().split(":");
 
 				int hours1 = Integer.parseInt(parts1[0]);
 				int minutes1 = Integer.parseInt(parts1[1]);
 				int hours2 = Integer.parseInt(parts2[0]);
 				int minutes2 = Integer.parseInt(parts2[1]);
 				if (hours1 > hours2) {
-					Ride temp = rides[j];
-					rides[j] = rides[j + 1];
-					rides[j + 1] = temp;
+					Ride temp = tempRides.get(j);
+					tempRides.set(j, tempRides.get(j + 1));
+					tempRides.set(j + 1, temp);
 
 				}
 				// sorting the occasion which the hours are equal so it compares
 				// the minutes
 				if (minutes1 > minutes2 && hours1 == hours2) {
-					Ride temp = rides[j];
-					rides[j] = rides[j + 1];
-					rides[j + 1] = temp;
+					Ride temp = tempRides.get(j);
+					tempRides.set(j, tempRides.get(j + 1));
+					tempRides.set(j + 1, temp);
 
 				}
 			}
@@ -67,122 +63,142 @@ public class RidesAdmin {
 	}
 
 	// Case 3
-	public String searchRideByArrivalTime(String departureStation,
-			String destinationStation, String arrivalTime) {
-		StringBuffer sbArrive = new StringBuffer("Rides from "
-				+ departureStation + " to " + destinationStation
-				+ " arrives till: " + arrivalTime);
-		int countRides = 0;
-		for (int i = 0; i < rides.length; i++) {
-			if (rides[i] != null && countRides < 3) {
-				if (rides[i].getDepartureStation().equalsIgnoreCase(departureStation)
-						&& rides[i].getDestinationStation().equals(
-								destinationStation)) {
+	public String searchRideByDepartureTime(String departureStation, String destinationStation, String departureTime,
+			String space) {
+		int counter = 0;
+		String time[] = departureTime.split(":");
+		int hour = Integer.parseInt(time[0]);
+		int minutes = Integer.parseInt(time[1]);
+		ArrayList<Ride> tempRides = new ArrayList<Ride>();
 
-					String[] parts1 = rides[i].getArrivalTime().split(":");
-					String[] parts2 = arrivalTime.split(":");
+		for (int i = 0; i < rides.size(); i++) {
+			if (rides.get(i).getDepartureStation().equalsIgnoreCase(departureStation)) {
+				if ((hour == rides.get(i).getDepartureHour() && minutes <= rides.get(i).getDepartureMinutes())
+						|| (hour < rides.get(i).getDepartureHour())) {
+					if (rides.get(i).getDestinationStation().equalsIgnoreCase(destinationStation)) {
+						tempRides.add(rides.get(i));
 
-					int hours1 = Integer.parseInt(parts1[0]);
-					int minutes1 = Integer.parseInt(parts1[1]);
-					int hours2 = Integer.parseInt(parts2[0]);
-					int minutes2 = Integer.parseInt(parts2[1]);
-
-					if (hours1 < hours2) {
-						sbArrive.append("\n****************************************************");
-						sbArrive.append("\n" + rides[i].toString() + "\n");
-						countRides++;
+						continue;
+					}
+					for (int j = 0; j < rides.get(i).getStopOvers().size(); j++) {
+						if (rides.get(i).getStopOvers().get(j).getName().equalsIgnoreCase(destinationStation)) {
+							tempRides.add(subStringRide(rides.get(i), departureStation, destinationStation));
+							break;
+						}
 
 					}
-					if (hours1 == hours2 && minutes1 <= minutes2) {
-						sbArrive.append("\n****************************************************");
-						sbArrive.append("\n" + rides[i].toString() + "\n");
-						countRides++;
-
-					}
+					continue;
 
 				}
+
 			}
+			for (int j = 0; j < rides.get(i).getStopOvers().size(); j++) {
+				if (rides.get(i).getStopOvers().get(j).getName().equalsIgnoreCase(departureStation)) {
+					if (hour <= rides.get(i).getStopOvers().get(j).getArrivalHour()
+							&& minutes <= rides.get(i).getStopOvers().get(j).getArrivalMinutes()) {
+						if (rides.get(i).getDestinationStation().equalsIgnoreCase(destinationStation)) {
+							tempRides.add(subStringRide(rides.get(i), departureStation, destinationStation));
+							break;
+						}
+						for (int j2 = j; j2 < rides.get(i).getStopOvers().size(); j2++) {
+							if (rides.get(i).getStopOvers().get(j2).getName().equalsIgnoreCase(destinationStation)) {
+								tempRides.add(subStringRide(rides.get(i), departureStation, destinationStation));
+								break;
+							}
+						}
+
+					}
+				}
+			}
+
 		}
-		if (countRides == 0) {
-			return "** No rides **";
-		} else
-			return sbArrive.toString();
+
+		sortRides(tempRides);
+
+		return sortHelper(tempRides, space);
+
 	}
 
-	// Case 3
-	public String searchRideByDepartureTime(String departureStation,
-			String destinationStation, String departureTime) {
-		StringBuffer sbDeparture = new StringBuffer("Rides from "
-				+ departureStation + " to " + destinationStation
-				+ " arrives after: " + departureTime);
-		int countRides = 0;
-		for (int i = 0; i < rides.length; i++) {
-			if (rides[i] != null && countRides < 3) {
-				if (rides[i].getDepartureStation().equalsIgnoreCase(departureStation)
-						&& rides[i].getDestinationStation().equalsIgnoreCase(destinationStation)) {
+	private Ride subStringRide(Ride ride, String departureStation, String destinationStation) {
+		String departure = null;
+		String destination = null;
+		String departureTime = null;
+		String destinationTime = null;
 
-					String[] parts1 = rides[i].getArrivalTime().split(":");
-					String[] parts2 = departureTime.split(":");
+		for (int i = 0; i < ride.getStopOvers().size(); i++) {
+			if (departureStation.equalsIgnoreCase(ride.getStopOvers().get(i).getName())) {
+				departure = ride.getStopOvers().get(i).getName();
+				departureTime = ride.getStopOvers().get(i).getArrivalTime();
+			}
+			if (ride.getDepartureStation().equalsIgnoreCase(departureStation)) {
+				departure = ride.getDepartureStation();
+				departureTime = ride.getDepartureTime();
+			}
+			if (ride.getDestinationStation().equalsIgnoreCase(destinationStation)) {
+				destination = ride.getDestinationStation();
+				destinationTime = ride.getArrivalTime();
+			}
+			if (destinationStation.equalsIgnoreCase(ride.getStopOvers().get(i).getName())) {
+				destination = ride.getStopOvers().get(i).getName();
+				destinationTime = ride.getStopOvers().get(i).getArrivalTime();
+			}
 
-					int hours1 = Integer.parseInt(parts1[0]);
-					int minutes1 = Integer.parseInt(parts1[1]);
-					int hours2 = Integer.parseInt(parts2[0]);
-					int minutes2 = Integer.parseInt(parts2[1]);
+		}
 
-					if (hours1 > hours2) {
-						sbDeparture
-								.append("\n****************************************************");
-						sbDeparture.append("\n" + rides[i].toString() + "\n");
-						countRides++;
-					}
-					if (hours1 == hours2 && minutes1 <= minutes2) {
-						sbDeparture
-								.append("\n****************************************************");
-						sbDeparture.append("\n" + rides[i].toString() + "\n");
-						countRides++;
-					}
-				}
+		Ride r = new Ride(departure, departureTime, destination, destinationTime);
+
+		return r;
+	}
+
+	private String sortHelper(ArrayList<Ride> tempRides, String space) {
+
+		StringBuffer sbRides = new StringBuffer();
+		int counter = 0;
+		if (tempRides.size() <= 0) {
+			sbRides.append("No rides matched to the search");
+			return sbRides.toString();
+		}
+		sbRides.append("Rides from " + tempRides.get(0).getDepartureStation() + " to "
+				+ tempRides.get(0).getDestinationStation() + ":");
+		sbRides.append(space);
+		sbRides.append(space);
+		for (int i = 0; i < tempRides.size(); i++) {
+
+			sbRides.append(tempRides.get(i).toString());
+			sbRides.append(space);
+			counter++;
+			if (counter == 3) {
+				break;
 			}
 		}
-		if (countRides == 0) {
-			return "** No rides **";
-		} else
-			return sbDeparture.toString();
+
+		return sbRides.toString();
 	}
 
 	// 4 - Saving rides into file
 	public void saveTheRidesIntoFile() throws FileNotFoundException {
 		PrintWriter program = new PrintWriter(ridesFile);
-		PrintWriter browser = new PrintWriter(ridesFileForBrowser);
-		
+
 		for (int i = 0; i < numberOfCurrentRides; i++) {
-			program.println(rides[i].getDepartureStation());
-			program.println(rides[i].getDestinationStation());
-			program.println(rides[i].getDepartureTime());
-			program.println(rides[i].getArrivalTime());
-			if (rides[i].getStopOvers() != null ) {
-				program.println(rides[i].getStopOvers().length);
-				for (int j = 0; j < rides[i].getStopOvers().length; j++) {
-					program.println(rides[i].getStopOvers()[j].getName());
-					program.println(rides[i].getStopOvers()[j].getArrivalTime());
-				}				
-			}else {
+			program.println(rides.get(i).getDepartureStation());
+			program.println(rides.get(i).getDestinationStation());
+			program.println(rides.get(i).getDepartureTime());
+			program.println(rides.get(i).getArrivalTime());
+			if (rides.get(i).getStopOvers() != null) {
+				program.println(rides.get(i).getStopOvers().size());
+				for (int j = 0; j < rides.get(i).getStopOvers().size(); j++) {
+					program.println(rides.get(i).getStopOvers().get(j).getName());
+					program.println(rides.get(i).getStopOvers().get(j).getArrivalTime());
+				}
+			} else {
 				program.println(0);
 			}
 			program.println();
 		}
 		program.close();
-		
-		for (int i = 0; i < numberOfCurrentRides; i++) {
-			browser.println(rides[i].getDepartureStation());
-			browser.println(rides[i].getDestinationStation());
-			browser.println(rides[i].getDepartureTime());
-			browser.println(rides[i].getArrivalTime());
-			browser.println();
-		}		
-		browser.close();
+
 	}
-	
+
 	// Read Rides File
 	public void readRidesFile() throws FileNotFoundException {
 		Scanner scan = new Scanner(ridesFile);
@@ -198,11 +214,11 @@ public class RidesAdmin {
 				int numberOfStopovers = scan.nextInt();
 				scan.nextLine();
 				if (numberOfStopovers != 0) {
-					StopOver[] stopovers = new StopOver[numberOfStopovers];
+					ArrayList<StopOver> stopovers = new ArrayList<StopOver>(numberOfStopovers);
 					for (int i = 0; i < numberOfStopovers; i++) {
 						String name = scan.nextLine();
 						String arrivalTimeToStopover = scan.nextLine();
-						stopovers[i] = new StopOver(name, arrivalTimeToStopover);
+						stopovers.add(new StopOver(name, arrivalTimeToStopover));
 					}
 					addStopOver(stopovers);
 				}
@@ -210,14 +226,14 @@ public class RidesAdmin {
 			}
 			scan.close();
 		}
-		
-	}
-	
-	public void addStopOver(StopOver[] stopovers) {
-		rides[numberOfCurrentRides - 1].addStopOver(stopovers);
+
 	}
 
-	public Ride[] getRides() {
+	public void addStopOver(ArrayList<StopOver> stopovers) {
+		rides.get(numberOfCurrentRides - 1).addStopOver(stopovers);
+	}
+
+	public ArrayList<Ride> getRides() {
 		return rides;
 	}
 
@@ -231,7 +247,7 @@ public class RidesAdmin {
 		for (int i = 0; i < numberOfCurrentRides; i++) {
 			sbAdmin.append("\n****************************************************");
 			sbAdmin.append("\n\nRide number " + (i + 1) + ": \n");
-			sbAdmin.append(rides[i].toString());
+			sbAdmin.append(rides.get(i).toString());
 		}
 		return sbAdmin.toString();
 	}

@@ -1,3 +1,4 @@
+
 import subprocess
 
 from flask import Flask, request
@@ -9,18 +10,22 @@ def rail_schedule():
     if 'destination' in request.args:
         destination = request.args.get('destination')
     else:
-        destination = "null"
+        destination = "beer_sheva"
 
     if 'departure' in request.args:
         departure = request.args.get('departure')
     else:
-        departure = "null"
+        departure = "tel_aviv"
 
     if 'departureTime' in request.args:
         departureTime = request.args.get('departureTime')
     else:
-        departureTime = "null"
+        departureTime = "12:00"
 
+    if 'textFormat' in request.args:
+        textFormat = request.args.get('textFormat')
+    else:
+        textFormat = "HTML"
 
-    return subprocess.check_output(["java", "-classpath", "/home/rivka/Rail_IL/bin", "rail_browser/Main_browser",
-                                   departure, destination, departureTime])
+    return subprocess.check_output(["java", "-classpath", "/home/vadim/Rail_IL/bin", "rail/Main",
+                                   departure, destination, departureTime,textFormat])

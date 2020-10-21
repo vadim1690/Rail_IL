@@ -1,15 +1,27 @@
 package rail;
 
+import java.util.ArrayList;
+
 public class Ride {
 
 	private String departureStation;
-	private String departureTime;
+	private int departureHour;
+	private int departureMinutes;
 	private String destinationStation;
+	private String departureTime;
 	private String arrivalTime;
-	private StopOver[] stopovers;
+	private int arrivalHour;
+	private int arrivalMinutes;
+	private ArrayList<StopOver> stopovers;
 
 	public Ride(String departureStation, String departureTime,
 			String destinationStation, String arrivalTime) {
+		setDepartureTime(departureTime);
+		
+		this.arrivalTime=arrivalTime;
+		this.departureTime=departureTime;
+		
+		stopovers=new ArrayList<StopOver>();
 
 		setArrivalTime(arrivalTime);
 		setDepartureStation(departureStation);
@@ -17,9 +29,38 @@ public class Ride {
 		setDestinationStation(destinationStation);
 	}
 
-	public void addStopOver(StopOver[] stopovers) {
+	public void addStopOver(ArrayList<StopOver> stopovers) {
 		this.stopovers = stopovers;
 
+	}
+	
+
+	public int getDepartureHour() {
+		return departureHour;
+	}
+
+	public int getDepartureMinutes() {
+		return departureMinutes;
+	}
+
+	public String getDepartureTime() {
+		return departureTime;
+	}
+
+	public String getArrivalTime() {
+		return arrivalTime;
+	}
+
+	public int getArrivalHour() {
+		return arrivalHour;
+	}
+
+	public int getArrivalMinutes() {
+		return arrivalMinutes;
+	}
+
+	public void setStopovers(ArrayList<StopOver> stopovers) {
+		this.stopovers = stopovers;
 	}
 
 	public String getDepartureStation() {
@@ -30,12 +71,13 @@ public class Ride {
 		this.departureStation = departureStation;
 	}
 
-	public String getDepartureTime() {
-		return departureTime;
-	}
+	
 
 	private void setDepartureTime(String departureTime) {
-		this.departureTime = departureTime;
+	String time[]=	departureTime.split(":");
+	departureHour=Integer.parseInt(time[0]);
+	departureMinutes=Integer.parseInt(time[1]);
+	
 	}
 
 	public String getDestinationStation() {
@@ -46,35 +88,31 @@ public class Ride {
 		this.destinationStation = destinationStation;
 	}
 
-	public String getArrivalTime() {
-		return arrivalTime;
-	}
+	
 
 	private void setArrivalTime(String arrivalTime) {
-		this.arrivalTime = arrivalTime;
+		String time[]=	arrivalTime.split(":");
+		arrivalHour=Integer.parseInt(time[0]);
+		arrivalMinutes=Integer.parseInt(time[1]);
 	}
 
-	public StopOver[] getStopOvers() {
+	public ArrayList<StopOver> getStopOvers() {
 		return stopovers;
 	}
 
-	@Override
-	/*
-	 * public String toString() { return + "\nStopovers: " + "\n" +
-	 * Arrays.toString(stopovers) ; }
-	 */
+	
 	public String toString() {
 
 		StringBuffer sbRides = new StringBuffer("Ride from departure Station:"
 				+ departureStation + ", departure Time=" + departureTime + "\n"
 				+ "The destination Station: " + destinationStation
-				+ ", arrival Time=" + arrivalTime);
-		if (stopovers != null) {
+				+ ", arrival Time=" + arrivalTime+"\n");
+		if (stopovers.size()!=0) {
 			sbRides.append("\n\nThe stopovers from " + departureStation
 					+ " to " + destinationStation + ": ");
-			for (int i = 0; i < stopovers.length; i++) {
+			for (int i = 0; i < stopovers.size(); i++) {
 				sbRides.append("\n\nStopover number " + (i + 1) + ": ");
-				sbRides.append(stopovers[i].toString());
+				sbRides.append(stopovers.get(i).toString()+"\n");
 			}
 		}
 		return sbRides.toString();
